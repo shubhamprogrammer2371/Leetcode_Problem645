@@ -1,0 +1,101 @@
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* findErrorNums(int* nums, int numsSize, int* returnSize)
+{
+    /*
+    Algo:
+
+    1. Take XOR of all numbers in nums with range of numbers 1:n -> X
+    2. Identify the duplicate element by inverting element nums[n-1] where n = 1..numSize
+        a. If a number is already negative, that is duplicate, say d.
+    3. Take X XOR d which gives the missing number, say z.
+    4. Return (d, z)
+    */
+
+    unsigned int X = 0, z;
+    int *result = malloc (sizeof(int) * 2) , d;
+    *returnSize = 0;
+    for (int i = 0; i < numsSize; i++)
+        X ^= (nums[i] ^ (i + 1));
+    for (int i = 0; i < numsSize; i++)
+    {
+        d = abs(nums[i]);
+        if (nums[d-1] < 0)
+            break;
+        nums[d-1] = 0 - nums[d-1];
+    }
+    result[(*returnSize)++] = d;
+    result[(*returnSize)++] = X ^ d;
+    return result;
+}
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* findErrorNums(int* nums, int numsSize, int* returnSize){
+    *returnSize = 2; // return size is always 2
+    int *HASH_TABLE = calloc((numsSize+1),sizeof(int)) , *return_val = calloc(2,sizeof(int)); // hash table creation and return value
+    for(int ptr=0; ptr < numsSize; ptr++) // populate hash table
+        HASH_TABLE[nums[ptr]]++;
+    for(int hash_ptr = 1; hash_ptr < numsSize + 1; hash_ptr++) // check if any value is hash table is not preset 
+    {
+       if(!HASH_TABLE[hash_ptr]) //number which is missing
+            return_val[1] = hash_ptr;       
+       if(HASH_TABLE[hash_ptr] == 2) //number which is repeated
+            return_val[0] = hash_ptr;
+    }
+    free(HASH_TABLE); // free hash table
+    return return_val;
+}
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* findErrorNums(int* nums, int numsSize, int* returnSize){
+    int *res = (malloc(sizeof(int) * 2)) , xorAcc = 0;
+    *returnSize = 2; 
+    for (int i = 0; i < numsSize; i++) 
+    {
+        xorAcc ^= nums[i];
+        xorAcc ^= i + 1;
+    }
+    int rightMostBit = xorAcc & -xorAcc , n1 = 0 , n2 = 0;
+    for (int i = 0; i < numsSize; i++) 
+    {
+        if (nums[i] & rightMostBit) 
+            n1 ^= nums[i];
+        else 
+            n2 ^= nums[i];
+        if ((i + 1) & rightMostBit)
+            n1 ^= (i + 1);
+        else
+            n2 ^= (i + 1);
+    }
+    bool n1Repeated = false;
+    for (int i = 0; i < numsSize; i++) 
+    {
+        if (!(nums[i] ^ n1)) 
+        {
+            n1Repeated = true;
+            break;
+        }
+    }
+    if (!n1Repeated) 
+    {
+        n2 = n1 ^ n2;
+        n1 = n1 ^ n2;
+        n2 = n1 ^ n2;
+    }
+    res[0] = n1;
+    res[1] = n2;
+    return res;
+}
